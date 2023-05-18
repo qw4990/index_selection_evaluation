@@ -24,7 +24,8 @@ class TiDBDatabaseConnector(DatabaseConnector):
                      port=4000,
                      user='root',
                      password='',
-                     database='test')
+                     database="{}".format(self.db_name),
+                     local_infile=True)
         self._cursor = self._connection.cursor()
     
     def enable_simulation(self):
@@ -46,7 +47,9 @@ class TiDBDatabaseConnector(DatabaseConnector):
 
 
     def import_data(self, table, path, delimiter="|"):
-        pass # TODO
+        load_sql = f"load data local infile '{path}' into table {table} fields terminated by '{delimiter}'"
+        logging.info(f"load data: {load_sql}")
+        self.exec_only(load_sql)
 
     def indexes_size(self):
         # TODO
