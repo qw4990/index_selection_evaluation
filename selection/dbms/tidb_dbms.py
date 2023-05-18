@@ -63,6 +63,8 @@ class TiDBDatabaseConnector(DatabaseConnector):
     def create_statistics(self):
         logging.info("TiDB: Run `analyze`")
         for table_name in self.exec_fetch("show tables", False):
+            if table_name[0] == "revenue0":
+                continue
             analyze_sql = "analyze table " + table_name[0]
             logging.info(f"run {analyze_sql}")
             self.exec_only(analyze_sql)
@@ -91,7 +93,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
             f"on {table_name} ({index.joined_column_names()})"
         )
         self.exec_fetch(statement)
-        return f"{table_name}.{idx_name}"
+        return (f"{table_name}.{idx_name}", idx_name)
 
     def _drop_simulated_index(self, ident):
         table_name = ident.split(".")[0]
