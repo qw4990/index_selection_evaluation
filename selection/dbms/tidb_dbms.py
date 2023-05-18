@@ -21,6 +21,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
         if self._connection:
             self.close()
         self._connection = pymysql.connect(host='127.0.0.1',
+                     port=4000,
                      user='root',
                      password='',
                      database='test')

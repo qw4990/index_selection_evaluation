@@ -26,6 +26,7 @@ class TableGenerator:
         self.columns = []
         self._prepare()
         if self.database_name() not in self.database_names:
+            logging.info(f"Create Database {self.database_name()} and generate data")
             self._generate()
             self.create_database()
         else:

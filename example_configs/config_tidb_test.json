@@ -1,0 +1,14 @@
+{
+    "database_system": "tidb",
+    "benchmark_name": "tpch",
+    "scale_factor": 1,
+    "algorithms": [
+        {
+            "name": "drop",
+            "parameters": {
+                "max_indexes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+            },
+            "timeout": 300
+        }
+    ]
+}
