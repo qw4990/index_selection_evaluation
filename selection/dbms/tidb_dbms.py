@@ -99,25 +99,14 @@ class TiDBDatabaseConnector(DatabaseConnector):
         self.exec_only(f"drop index {idx_name} on {table_name}")
 
     def create_index(self, index):
-        table_name = index.table()
-        statement = (
-            f"create index {index.index_idx()} "
-            f"on {table_name} ({index.joined_column_names()})"
-        )
-        self.exec_only(statement)
-        index.estimated_size = 0 # TODO
+        raise Exception("use what-if API")
 
     def drop_indexes(self):
-        pass # TODO
+        raise Exception("use what-if API")
 
     # run this query and return the actual execution time
     def exec_query(self, query, timeout=None, cost_evaluation=False):
-        query_text = self._prepare_query(query)
-        start_time = time.time()
-        self._cursor.execute(query_text)
-        execution_time = time.time() - start_time
-        self._cleanup_query(query)
-        return execution_time, {}
+        raise Exception("use what-if API")
 
     def _cleanup_query(self, query):
         for query_statement in query.text.split(";"):
@@ -135,12 +124,3 @@ class TiDBDatabaseConnector(DatabaseConnector):
         query_plan = self.exec_fetch(statement, False)
         self._cleanup_query(query)
         return query_plan
-
-    def number_of_indexes(self):
-        pass # TODO
-
-    def table_exists(self, table_name):
-        pass # TODO
-
-    def database_exists(self, database_name):
-        pass # TODO
