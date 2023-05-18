@@ -116,6 +116,7 @@ class TableGenerator:
 
     def _run_command(self, command):
         cmd_out = "[SUBPROCESS OUTPUT] "
+        logging.info(f"generating({command}) ...")
         p = subprocess.Popen(
             command,
             cwd=self.directory,

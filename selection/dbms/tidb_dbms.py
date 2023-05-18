@@ -35,7 +35,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
         return [x[0] for x in result]
     
     def update_query_text(self, text):
-        pass # TODO
+        return text
 
     def _add_alias_subquery(self, query_text):
         pass # TODO
@@ -60,10 +60,10 @@ class TiDBDatabaseConnector(DatabaseConnector):
 
     def create_statistics(self):
         logging.info("TiDB: Run `analyze`")
-        self.commit()
-        self._connection.autocommit = True
-        self.exec_only("analyze")
-        self._connection.autocommit = self.autocommit
+        for table_name in self.exec_fetch("show tables", False):
+            analyze_sql = "analyze table " + table_name[0]
+            logging.info(f"run {analyze_sql}")
+            self.exec_only(analyze_sql)
 
     def set_random_seed(self, value=0.17):
         pass # TODO
