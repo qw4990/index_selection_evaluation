@@ -1,6 +1,7 @@
 import logging
 import re
 import pymysql
+import time
 
 from selection.database_connector import DatabaseConnector
 
@@ -72,8 +73,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
     def supports_index_simulation(self):
         return True
     
-    def _simulate_index(self, index):
-        table_name = index.table()
+    def show_simulated_index(self, table_name):
         sql = f"show create table {table_name}"
         result = self.exec_fetch(sql)
         hypo_indexes = []
@@ -83,8 +83,20 @@ class TiDBDatabaseConnector(DatabaseConnector):
                 hypo_indexes.append(tmp[1])
         return hypo_indexes
 
-    def _drop_simulated_index(self, oid):
-        pass # TODO
+    def _simulate_index(self, index):
+        table_name = index.table()
+        idx_name = f"hypo_{index.index_idx()}"
+        statement = (
+            f"create index {idx_name} type hypo "
+            f"on {table_name} ({index.joined_column_names()})"
+        )
+        result = self.exec_fetch(statement)
+        return f"{table_name}.{idx_name}"
+
+    def _drop_simulated_index(self, ident):
+        table_name = ident.split(".")[0]
+        idx_name = ident.split(".")[1]
+        self.exec_only(f"drop index {idx_name} on {table_name}")
 
     def create_index(self, index):
         table_name = index.table()
@@ -99,16 +111,29 @@ class TiDBDatabaseConnector(DatabaseConnector):
         pass # TODO
 
     def exec_query(self, query, timeout=None, cost_evaluation=False):
-        pass # TODO
+        query_text = self._prepare_query(query)
+        start_time = time.time()
+        self._cursor.execute(query_text)
+        execution_time = time.time() - start_time
+        self._cleanup_query(query)
+        return execution_time, {}
 
     def _cleanup_query(self, query):
-        pass # TODO
+        for query_statement in query.text.split(";"):
+            if "drop view" in query_statement:
+                self.exec_only(query_statement)
 
     def _get_cost(self, query):
-        pass # TODO
+        query_plan = self._get_plan(query)
+        cost = query_plan[0][2]
+        return cost
 
     def _get_plan(self, query):
-        pass # TODO
+        query_text = self._prepare_query(query)
+        statement = f"explain format='verbose' {query_text}"
+        query_plan = self.exec_fetch(statement)
+        self._cleanup_query(query)
+        return query_plan
 
     def number_of_indexes(self):
         pass # TODO
