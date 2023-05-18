@@ -110,6 +110,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
     def drop_indexes(self):
         pass # TODO
 
+    # run this query and return the actual execution time
     def exec_query(self, query, timeout=None, cost_evaluation=False):
         query_text = self._prepare_query(query)
         start_time = time.time()
@@ -131,7 +132,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
     def _get_plan(self, query):
         query_text = self._prepare_query(query)
         statement = f"explain format='verbose' {query_text}"
-        query_plan = self.exec_fetch(statement)
+        query_plan = self.exec_fetch(statement, False)
         self._cleanup_query(query)
         return query_plan
 
