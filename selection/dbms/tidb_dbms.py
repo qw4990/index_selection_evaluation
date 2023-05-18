@@ -36,15 +36,14 @@ class TiDBDatabaseConnector(DatabaseConnector):
         return [x[0] for x in result]
     
     def update_query_text(self, text):
-        return text
+        return text # Do nothing
 
     def _add_alias_subquery(self, query_text):
-        pass # TODO
+        return query_text # Do nothing
 
     def create_database(self, database_name):
         self.exec_only("create database {}".format(database_name))
         logging.info("Database {} created".format(database_name))
-
 
     def import_data(self, table, path, delimiter="|"):
         load_sql = f"load data local infile '{path}' into table {table} fields terminated by '{delimiter}'"
@@ -52,8 +51,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
         self.exec_only(load_sql)
 
     def indexes_size(self):
-        # TODO
-        return 0
+        return 0 # TODO
 
     def drop_database(self, database_name):
         statement = f"DROP DATABASE {database_name};"
@@ -69,19 +67,33 @@ class TiDBDatabaseConnector(DatabaseConnector):
             self.exec_only(analyze_sql)
 
     def set_random_seed(self, value=0.17):
-        pass # TODO
+        pass # Do nothing
 
     def supports_index_simulation(self):
         return True
     
     def _simulate_index(self, index):
-        pass # TODO
+        table_name = index.table()
+        sql = f"show create table {table_name}"
+        result = self.exec_fetch(sql)
+        hypo_indexes = []
+        for line in result[1].split("\n"):
+            if "HYPO INDEX" in line:
+                tmp = line.split("`")
+                hypo_indexes.append(tmp[1])
+        return hypo_indexes
 
     def _drop_simulated_index(self, oid):
         pass # TODO
 
     def create_index(self, index):
-        pass # TODO
+        table_name = index.table()
+        statement = (
+            f"create index {index.index_idx()} "
+            f"on {table_name} ({index.joined_column_names()})"
+        )
+        self.exec_only(statement)
+        index.estimated_size = 0 # TODO
 
     def drop_indexes(self):
         pass # TODO
