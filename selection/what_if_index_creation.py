@@ -34,10 +34,11 @@ class WhatIfIndexCreation:
         return indexes
 
     def estimate_index_size(self, index_oid):
-        statement = f"select hypopg_relation_size({index_oid})"
-        result = self.db_connector.exec_fetch(statement)[0]
-        assert result > 0, "Hypothetical index does not exist."
-        return result
+        return 0
+        # statement = f"select hypopg_relation_size({index_oid})"
+        # result = self.db_connector.exec_fetch(statement)[0]
+        # assert result > 0, "Hypothetical index does not exist."
+        # return result
 
     # TODO: refactoring
     # This is never used, we keep it for debugging reasons.

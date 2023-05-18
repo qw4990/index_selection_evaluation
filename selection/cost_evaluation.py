@@ -41,7 +41,7 @@ class CostEvaluation:
         self._prepare_cost_calculation(indexes, store_size=True)
 
         plan = self.db_connector.get_plan(query)
-        cost = plan["Total Cost"]
+        cost = self.db_connector.get_cost(query)
         plan_str = str(plan)
 
         recommended_indexes = set()

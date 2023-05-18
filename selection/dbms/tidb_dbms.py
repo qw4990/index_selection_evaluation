@@ -90,7 +90,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
             f"create index {idx_name} type hypo "
             f"on {table_name} ({index.joined_column_names()})"
         )
-        result = self.exec_fetch(statement)
+        self.exec_fetch(statement)
         return f"{table_name}.{idx_name}"
 
     def _drop_simulated_index(self, ident):
@@ -102,7 +102,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
         raise Exception("use what-if API")
 
     def drop_indexes(self):
-        raise Exception("use what-if API")
+        return # Do nothing since we use what-if API
 
     # run this query and return the actual execution time
     def exec_query(self, query, timeout=None, cost_evaluation=False):
@@ -116,7 +116,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
     def _get_cost(self, query):
         query_plan = self._get_plan(query)
         cost = query_plan[0][2]
-        return cost
+        return float(cost)
 
     def _get_plan(self, query):
         query_text = self._prepare_query(query)
