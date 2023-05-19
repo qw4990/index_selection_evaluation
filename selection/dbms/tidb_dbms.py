@@ -9,6 +9,8 @@ class TiDBDatabaseConnector(DatabaseConnector):
     def __init__(self, db_name, autocommit=False):
         DatabaseConnector.__init__(self, db_name, autocommit=autocommit)
         self.db_system = "TiDB"
+        if db_name is None:
+            db_name = 'test'
         self._connection = None
         self.db_name = db_name
         self.create_connection()
@@ -64,12 +66,12 @@ class TiDBDatabaseConnector(DatabaseConnector):
             if table_type != 'BASE TABLE':
                 logging.info(f"skip analyze {table_name} {table_type}")
                 continue
-            analyze_sql = "analyze table " + table_name[0]
+            analyze_sql = "analyze table " + table_name
             logging.info(f"run {analyze_sql}")
             self.exec_only(analyze_sql)
             
             # to let the TiDB load all stats into memory
-            cols = self.exec_fetch(f"select column_name from information_schema.columns where table_schema='{self.db_name}' and table_name='{table_name[0]}'")
+            cols = [col[0] for col in self.exec_fetch(f"select column_name from information_schema.columns where table_schema='{self.db_name}' and table_name='{table_name}'", False)]
             sql = f"explain select * from {table_name} where " + " and ".join(cols)
             self.exec_only(sql)
 
