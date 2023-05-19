@@ -10,9 +10,7 @@ class TiDBDatabaseConnector(DatabaseConnector):
         DatabaseConnector.__init__(self, db_name, autocommit=autocommit)
         self.db_system = "TiDB"
         self._connection = None
-
-        if not self.db_name:
-            self.db_name = "test"
+        self.db_name = db_name
         self.create_connection()
 
         self.set_random_seed()
@@ -69,6 +67,11 @@ class TiDBDatabaseConnector(DatabaseConnector):
             analyze_sql = "analyze table " + table_name[0]
             logging.info(f"run {analyze_sql}")
             self.exec_only(analyze_sql)
+            
+            # to let the TiDB load all stats into memory
+            cols = self.exec_fetch(f"select column_name from information_schema.columns where table_schema='{self.db_name}' and table_name='{table_name[0]}'")
+            sql = f"explain select * from {table_name} where " + " and ".join(cols)
+            self.exec_only(sql)
 
     def set_random_seed(self, value=0.17):
         pass # Do nothing
