@@ -33,8 +33,6 @@ ALGORITHMS = {
     "relaxation": RelaxationAlgorithm,
     "no_index": NoIndexAlgorithm,
     "all_indexes": AllIndexesAlgorithm,
-
-    "tidb_test": None,
 }
 
 # DBMSYSTEMS = {"postgres": PostgresDatabaseConnector, "hana": HanaDatabaseConnector, "tidb": TiDBDatabaseConnector}
