@@ -62,8 +62,9 @@ class TiDBDatabaseConnector(DatabaseConnector):
 
     def create_statistics(self):
         logging.info("TiDB: Run `analyze`")
-        for table_name in self.exec_fetch("show tables", False):
-            if table_name[0] == "revenue0":
+        for table_name, table_type in self.exec_fetch("show full tables", False):
+            if table_type != 'BASE TABLE':
+                logging.info(f"skip analyze {table_name} {table_type}")
                 continue
             analyze_sql = "analyze table " + table_name[0]
             logging.info(f"run {analyze_sql}")
@@ -124,5 +125,8 @@ class TiDBDatabaseConnector(DatabaseConnector):
         query_text = self._prepare_query(query)
         statement = f"explain format='verbose' {query_text}"
         query_plan = self.exec_fetch(statement, False)
+        for line in query_plan:
+            if "stats:pseudo" in line[5]:
+                raise Exception("plan with pseudo stats " + str(query_plan))
         self._cleanup_query(query)
         return query_plan
